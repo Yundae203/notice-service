@@ -4,6 +4,8 @@ import enterprise.subject.notification.product_notification.dto.ProductNotificat
 import enterprise.subject.notification.product_notification.model.NotificationStatus;
 import enterprise.subject.notification.product_notification.model.ProductNotificationHistory;
 import enterprise.subject.notification.product_notification.repository.ProductNotificationHistoryRepository;
+import enterprise.subject.notification.product_user_notification.model.ProductUserNotificationHistory;
+import enterprise.subject.notification.product_user_notification.repository.ProductUserNotificationHistoryRepository;
 import io.github.bucket4j.Bucket;
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,10 +15,11 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class Consumer implements Runnable {
 
-    private final BlockingDeque<ProductNotification> queue;
     private final Bucket bucket;
+    private final BlockingDeque<ProductNotification> queue;
     private final ConcurrentHashMap<Long, NotificationStatus> productsId;
-    private final ProductNotificationHistoryRepository repository;
+    private final ProductNotificationHistoryRepository productNoticeRepository;
+    private final ProductUserNotificationHistoryRepository userNoticeRepository;
 
     private Long currentId;
     ProductNotification notice;
@@ -25,12 +28,14 @@ public class Consumer implements Runnable {
             Bucket bucket,
             BlockingDeque<ProductNotification> queue,
             ConcurrentHashMap<Long, NotificationStatus> productsId,
-            ProductNotificationHistoryRepository repository
+            ProductNotificationHistoryRepository productNoticeRepository,
+            ProductUserNotificationHistoryRepository userNoticeRepository
     ) {
         this.bucket = bucket;
         this.queue = queue;
         this.productsId = productsId;
-        this.repository = repository;
+        this.productNoticeRepository = productNoticeRepository;
+        this.userNoticeRepository = userNoticeRepository;
     }
 
     @Override
@@ -40,6 +45,7 @@ public class Consumer implements Runnable {
             try {
                 notice = queue.take();
                 currentId = notice.getProductId();
+
                 // 매진 여부 확인하여 처리 토큰 소모 X
                 if (isSOLD_OUT(currentId)) {
                     // SOLD_OUT
@@ -51,12 +57,14 @@ public class Consumer implements Runnable {
                 // bucket 사용하여 처리율 제한
                 if (bucket.tryConsume(1) && isIN_PROGRESS(currentId)) {
                     // COMPLETE
+                    saveUserNotification(notice); // Product_User_Notification 저장
+
                     if (isLastNotice(notice)) { // 마지막 요청일 경우 요청 완료로 저장
                         log.info("COMPLETE lastNotice = {}", notice);
                         saveHistory(notice, NotificationStatus.COMPLETED);
                     }
 
-                } else if (isIN_PROGRESS(currentId)) {
+                } else if (isIN_PROGRESS(currentId)) { // 토큰이 부족할 시
                     log.info("token is empty");
                     queue.addFirst(notice);
                 }
@@ -76,6 +84,15 @@ public class Consumer implements Runnable {
         }
     }
 
+    private void saveUserNotification(ProductNotification notice) {
+        userNoticeRepository.save(ProductUserNotificationHistory.builder()
+                .productId(notice.getProductId())
+                .userId(notice.getUserId())
+                .restockVersion(notice.getReStockVersion())
+                .build()
+        );
+    }
+
     private boolean isSOLD_OUT(Long productId) {
         return productsId.get(productId) == NotificationStatus.CANCELLED_BY_SOLD_OUT;
     }
@@ -93,7 +110,7 @@ public class Consumer implements Runnable {
 
         history.changeStatus(status);
 
-        repository.save(history);
+        productNoticeRepository.save(history);
     }
 
     private boolean isLastNotice(ProductNotification notice) {

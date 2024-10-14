@@ -6,6 +6,7 @@ import enterprise.subject.notification.product_notification.model.NotificationSt
 import enterprise.subject.notification.product_notification.repository.ProductNotificationHistoryRepository;
 import enterprise.subject.notification.product_notification.service.Consumer;
 import enterprise.subject.notification.product_notification.service.Producer;
+import enterprise.subject.notification.product_user_notification.repository.ProductUserNotificationHistoryRepository;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Refill;
@@ -22,6 +23,7 @@ public class NotificationManagerConfig {
 
     private static final int REQUESTS_PER_SECOND = 500;
     private final ProductNotificationHistoryRepository productNotificationHistoryRepository;
+    private final ProductUserNotificationHistoryRepository productUserNotificationHistoryRepository;
 
     @Bean
     public NotificationManager notificationManager() {
@@ -35,7 +37,7 @@ public class NotificationManagerConfig {
 
     @Bean
     public Consumer consumer() {
-        return new Consumer(notificationBucket(), noticeDeque(), productsId(), productNotificationHistoryRepository);
+        return new Consumer(notificationBucket(), noticeDeque(), productsId(), productNotificationHistoryRepository, productUserNotificationHistoryRepository);
     }
 
     @Bean
