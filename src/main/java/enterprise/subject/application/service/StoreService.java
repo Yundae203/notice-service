@@ -1,9 +1,6 @@
 package enterprise.subject.application.service;
 
 import enterprise.subject.application.dto.NotificationRequest;
-import enterprise.subject.notification.product_notification.model.NotificationStatus;
-import enterprise.subject.notification.product_notification.model.ProductNotificationHistory;
-import enterprise.subject.notification.product_notification.repository.ProductNotificationHistoryRepository;
 import enterprise.subject.notification.product_user_notification.service.ProductUserNotificationService;
 import enterprise.subject.product.model.Product;
 import enterprise.subject.product.service.ProductService;
