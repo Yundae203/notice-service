@@ -1,8 +1,10 @@
 package enterprise.subject.infrastructer.config;
 
 import enterprise.subject.infrastructer.notice.controller.NotificationManager;
-import enterprise.subject.infrastructer.notice.model.ProductUserNotificationHistory;
-import enterprise.subject.infrastructer.notice.repository.ProductUserNotificationHistoryRepository;
+import enterprise.subject.infrastructer.notice.dto.ProductNotification;
+import enterprise.subject.infrastructer.notice.model.NotificationStatus;
+import enterprise.subject.infrastructer.notice.model.ProductNotificationHistory;
+import enterprise.subject.infrastructer.notice.repository.ProductNotificationHistoryRepository;
 import enterprise.subject.infrastructer.notice.service.Consumer;
 import enterprise.subject.infrastructer.notice.service.Producer;
 import io.github.bucket4j.Bandwidth;
@@ -20,7 +22,7 @@ import java.util.concurrent.*;
 public class NotificationManagerConfig {
 
     private static final int REQUESTS_PER_SECOND = 500;
-    private final ProductUserNotificationHistoryRepository productUserNotificationHistoryRepository;
+    private final ProductNotificationHistoryRepository productNotificationHistoryRepository;
 
     @Bean
     public NotificationManager notificationManager() {
@@ -29,12 +31,12 @@ public class NotificationManagerConfig {
 
     @Bean
     public Producer producer() {
-        return new Producer(noticeDeque(), productUserNotificationHistoryRepository);
+        return new Producer(noticeDeque());
     }
 
     @Bean
     public Consumer consumer() {
-        return new Consumer(notificationBucket(), noticeDeque(), productsId(), productUserNotificationHistoryRepository);
+        return new Consumer(notificationBucket(), noticeDeque(), productsId(), productNotificationHistoryRepository);
     }
 
     @Bean
@@ -46,12 +48,12 @@ public class NotificationManagerConfig {
     }
 
     @Bean
-    public BlockingDeque<ProductUserNotificationHistory> noticeDeque() {
+    public BlockingDeque<ProductNotification> noticeDeque() {
         return new LinkedBlockingDeque<>();
     }
 
     @Bean
-    public ConcurrentHashMap<Long, Integer> productsId() {
+    public ConcurrentHashMap<Long, NotificationStatus> productsId() {
         return new ConcurrentHashMap<>();
     }
 }

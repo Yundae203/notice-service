@@ -1,8 +1,9 @@
 package enterprise.subject.infrastructer.notice.service;
 
+import enterprise.subject.infrastructer.notice.dto.ProductNotification;
 import enterprise.subject.infrastructer.notice.model.NotificationStatus;
-import enterprise.subject.infrastructer.notice.model.ProductUserNotificationHistory;
-import enterprise.subject.infrastructer.notice.repository.ProductUserNotificationHistoryRepository;
+import enterprise.subject.infrastructer.notice.model.ProductNotificationHistory;
+import enterprise.subject.infrastructer.notice.repository.ProductNotificationHistoryRepository;
 import io.github.bucket4j.Bucket;
 import lombok.extern.slf4j.Slf4j;
 
@@ -12,15 +13,16 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class Consumer implements Runnable {
 
-    private final BlockingDeque<ProductUserNotificationHistory> queue;
+    private final BlockingDeque<ProductNotification> queue;
     private final Bucket bucket;
-    private final ConcurrentHashMap<Long, Integer> productsId;
-    private final ProductUserNotificationHistoryRepository repository;
+    private final ConcurrentHashMap<Long, NotificationStatus> productsId;
+    private final ProductNotificationHistoryRepository repository;
 
-    public Consumer(Bucket bucket,
-                    BlockingDeque<ProductUserNotificationHistory> queue,
-                    ConcurrentHashMap<Long, Integer> productsId,
-                    ProductUserNotificationHistoryRepository repository
+    public Consumer(
+            Bucket bucket,
+            BlockingDeque<ProductNotification> queue,
+            ConcurrentHashMap<Long, NotificationStatus> productsId,
+            ProductNotificationHistoryRepository repository
     ) {
         this.bucket = bucket;
         this.queue = queue;
@@ -33,33 +35,62 @@ public class Consumer implements Runnable {
 
         while (true) {
             try {
-                ProductUserNotificationHistory history = queue.take();
+                ProductNotification notice = queue.take();
 
-                // 매진 여부 확인하여 처리
-                if (isSoldOut(history)) {
+                // 매진 여부 확인하여 처리 토큰 소모 X
+                if (isSOLD_OUT(notice)) {
                     // SOLD_OUT
-                    history.changeStatus(NotificationStatus.CANCELLED_BY_SOLD_OUT);
-                    repository.save(history);
+                    log.info("SOLD_OUT");
+                    saveHistory(notice, NotificationStatus.CANCELLED_BY_SOLD_OUT); // 매진 처리
+                    productsId.put(notice.getProductId(), NotificationStatus.PASS);
                     return;
                 }
 
                 // bucket 사용하여 처리율 제한
-                if (bucket.tryConsume(1)) {
+                if (bucket.tryConsume(1) && isIN_PROGRESS(notice)) {
                     // COMPLETE
-                    history.changeStatus(NotificationStatus.COMPLETED);
-                    repository.save(history);
-                } else {
+                    if (isLastNotice(notice)) { // 마지막 요청일 경우 요청 완료로 저장
+                        log.info("COMPLETE lastNotice = {}", notice);
+                        saveHistory(notice, NotificationStatus.COMPLETED);
+                    }
+
+                } else if (isIN_PROGRESS(notice)) {
                     log.info("token is empty");
-                    queue.addFirst(history);
+                    queue.addFirst(notice);
                 }
 
-            } catch (InterruptedException ignored) {
+                // 마지막 요청일 경우 HashMap 에서 key 제거
+                if (isLastNotice(notice)) {
+                    productsId.remove(notice.getProductId());
+                }
 
+            } catch (InterruptedException e) {
+                log.info("interrupted");
             }
         }
     }
 
-    private boolean isSoldOut(ProductUserNotificationHistory history) {
-        return !productsId.contains(history.getProductId());
+    private boolean isSOLD_OUT(ProductNotification notice) {
+        return productsId.get(notice.getProductId()) == NotificationStatus.CANCELLED_BY_SOLD_OUT;
+    }
+
+    private boolean isIN_PROGRESS(ProductNotification notice) {
+        return productsId.get(notice.getProductId()) == NotificationStatus.IN_PROGRESS;
+    }
+
+    private void saveHistory(ProductNotification notice, NotificationStatus status) {
+        ProductNotificationHistory history = ProductNotificationHistory.builder()
+                        .productId(notice.getProductId())
+                        .restockVersion(notice.getReStockVersion())
+                        .lastUser(notice.getUserId())
+                        .build();
+
+        history.changeStatus(status);
+
+        repository.save(history);
+    }
+
+    private boolean isLastNotice(ProductNotification notice) {
+        return notice.isLast();
     }
 }

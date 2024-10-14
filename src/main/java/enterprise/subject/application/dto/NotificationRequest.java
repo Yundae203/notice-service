@@ -1,12 +1,18 @@
 package enterprise.subject.application.dto;
 
-import lombok.Getter;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
-@Getter
-public class NotificationRequest {
-    private Long productId;
-    private Integer restockVersion;
-    private List<Long> users;
+public record NotificationRequest(
+        @NotNull Long productId,
+        @NotNull Integer restockVersion,
+        List<Long> users
+) {
+
+    public NotificationRequest(Long productId, Integer restockVersion, List<Long> users) {
+        this.productId = productId;
+        this.restockVersion = restockVersion;
+        this.users = users;
+    }
 }

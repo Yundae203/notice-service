@@ -6,30 +6,31 @@ import lombok.*;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ProductUserNotificationHistory {
+public class ProductNotificationHistory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Long productId;
-    private Long userId;
     private Integer stockVersion;
 
     @Enumerated(EnumType.STRING)
     private NotificationStatus status;
 
+    private Long lastUser;
+
     @Builder
-    public ProductUserNotificationHistory(
+    public ProductNotificationHistory(
             Long productId,
-            Long userId,
             Integer restockVersion,
-            NotificationStatus status
-    ) {
+            NotificationStatus status,
+            Long lastUser
+            ) {
         this.productId = productId;
-        this.userId = userId;
         this.stockVersion = restockVersion;
         this.status = status;
+        this.lastUser = lastUser;
     }
 
     public void changeStatus(NotificationStatus status) {

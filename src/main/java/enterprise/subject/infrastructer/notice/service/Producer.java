@@ -1,22 +1,22 @@
 package enterprise.subject.infrastructer.notice.service;
 
-import enterprise.subject.infrastructer.notice.model.ProductUserNotificationHistory;
-import enterprise.subject.infrastructer.notice.repository.ProductUserNotificationHistoryRepository;
+import enterprise.subject.infrastructer.notice.dto.ProductNotification;
+import enterprise.subject.infrastructer.notice.model.ProductNotificationHistory;
+import enterprise.subject.infrastructer.notice.repository.ProductNotificationHistoryRepository;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.BlockingDeque;
 
+@Slf4j
 public class Producer {
 
-    private final BlockingDeque<ProductUserNotificationHistory> queue;
-    private final ProductUserNotificationHistoryRepository repository;
+    private final BlockingDeque<ProductNotification> queue;
 
-    public Producer(BlockingDeque<ProductUserNotificationHistory> queue, ProductUserNotificationHistoryRepository repository) {
+    public Producer(BlockingDeque<ProductNotification> queue) {
         this.queue = queue;
-        this.repository = repository;
     }
 
-    public void produce(ProductUserNotificationHistory history) {
-        repository.save(history); // IN_PROGRESS 상태로 저장
-        queue.offer(history); // consumer 에게 전달
+    public void produce(ProductNotification notice) {
+        queue.offer(notice); // consumer 에게 전달
     }
 }
