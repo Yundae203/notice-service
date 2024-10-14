@@ -23,4 +23,5 @@ public class StoreController {
         storeService.restock(productId, request.quantity());
         return ResponseEntity.ok().build();
     }
+
 }

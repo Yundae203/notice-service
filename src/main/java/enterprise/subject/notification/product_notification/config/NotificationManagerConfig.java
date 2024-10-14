@@ -1,12 +1,11 @@
-package enterprise.subject.infrastructer.config;
+package enterprise.subject.notification.product_notification.config;
 
-import enterprise.subject.infrastructer.notice.controller.NotificationManager;
-import enterprise.subject.infrastructer.notice.dto.ProductNotification;
-import enterprise.subject.infrastructer.notice.model.NotificationStatus;
-import enterprise.subject.infrastructer.notice.model.ProductNotificationHistory;
-import enterprise.subject.infrastructer.notice.repository.ProductNotificationHistoryRepository;
-import enterprise.subject.infrastructer.notice.service.Consumer;
-import enterprise.subject.infrastructer.notice.service.Producer;
+import enterprise.subject.notification.product_notification.controller.NotificationManager;
+import enterprise.subject.notification.product_notification.dto.ProductNotification;
+import enterprise.subject.notification.product_notification.model.NotificationStatus;
+import enterprise.subject.notification.product_notification.repository.ProductNotificationHistoryRepository;
+import enterprise.subject.notification.product_notification.service.Consumer;
+import enterprise.subject.notification.product_notification.service.Producer;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Refill;

@@ -1,4 +1,4 @@
-package enterprise.subject.infrastructer.notice.model;
+package enterprise.subject.notification.product_notification.model;
 
 public enum NotificationStatus {
     IN_PROGRESS,

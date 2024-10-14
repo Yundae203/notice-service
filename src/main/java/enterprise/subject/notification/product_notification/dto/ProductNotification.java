@@ -1,4 +1,4 @@
-package enterprise.subject.infrastructer.notice.dto;
+package enterprise.subject.notification.product_notification.dto;
 
 import lombok.Builder;
 import lombok.Getter;

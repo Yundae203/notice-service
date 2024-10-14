@@ -1,4 +1,4 @@
-package enterprise.subject.domain.product.model;
+package enterprise.subject.product.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

@@ -1,8 +1,6 @@
-package enterprise.subject.infrastructer.notice.service;
+package enterprise.subject.notification.product_notification.service;
 
-import enterprise.subject.infrastructer.notice.dto.ProductNotification;
-import enterprise.subject.infrastructer.notice.model.ProductNotificationHistory;
-import enterprise.subject.infrastructer.notice.repository.ProductNotificationHistoryRepository;
+import enterprise.subject.notification.product_notification.dto.ProductNotification;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.BlockingDeque;

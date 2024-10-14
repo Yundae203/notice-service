@@ -1,10 +1,10 @@
-package enterprise.subject.infrastructer.notice.controller;
+package enterprise.subject.notification.product_notification.controller;
 
 import enterprise.subject.application.dto.NotificationRequest;
-import enterprise.subject.infrastructer.notice.dto.ProductNotification;
-import enterprise.subject.infrastructer.notice.model.NotificationStatus;
-import enterprise.subject.infrastructer.notice.service.Consumer;
-import enterprise.subject.infrastructer.notice.service.Producer;
+import enterprise.subject.notification.product_notification.dto.ProductNotification;
+import enterprise.subject.notification.product_notification.model.NotificationStatus;
+import enterprise.subject.notification.product_notification.service.Consumer;
+import enterprise.subject.notification.product_notification.service.Producer;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,16 +51,14 @@ public class NotificationManager {
                         .build())
                 .collect(Collectors.toList());
 
-        ProductNotification model = models.getLast();
-        ProductNotification model2 = models.getFirst();
-        model.endElement();
-        log.info("model = {}", model);
-        log.info("model2 = {}", model2);
+        models.getLast().endElement(); // 마지막 요소 표시
 
         return models;
     }
 
     public void soldOut(Long productId) {
-        productIds.put(productId, NotificationStatus.CANCELLED_BY_SOLD_OUT); // SOLD_OUT 처리
+        if (productIds.contains(productId)) {
+            productIds.put(productId, NotificationStatus.CANCELLED_BY_SOLD_OUT); // SOLD_OUT 처리
+        }
     }
 }

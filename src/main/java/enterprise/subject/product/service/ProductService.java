@@ -1,7 +1,7 @@
-package enterprise.subject.domain.product.service;
+package enterprise.subject.product.service;
 
-import enterprise.subject.domain.product.model.Product;
-import enterprise.subject.domain.product.repository.ProductRepository;
+import enterprise.subject.product.model.Product;
+import enterprise.subject.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

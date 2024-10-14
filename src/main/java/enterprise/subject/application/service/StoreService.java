@@ -1,10 +1,13 @@
 package enterprise.subject.application.service;
 
 import enterprise.subject.application.dto.NotificationRequest;
-import enterprise.subject.application.relation.subscription.ProductUserNotificationService;
-import enterprise.subject.domain.product.model.Product;
-import enterprise.subject.domain.product.service.ProductService;
-import enterprise.subject.infrastructer.notice.controller.NotificationManager;
+import enterprise.subject.notification.product_notification.model.NotificationStatus;
+import enterprise.subject.notification.product_notification.model.ProductNotificationHistory;
+import enterprise.subject.notification.product_notification.repository.ProductNotificationHistoryRepository;
+import enterprise.subject.notification.product_user_notification.service.ProductUserNotificationService;
+import enterprise.subject.product.model.Product;
+import enterprise.subject.product.service.ProductService;
+import enterprise.subject.notification.product_notification.controller.NotificationManager;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +26,7 @@ public class StoreService {
         product.reStock(quantity);
         productService.save(product);
 
-        List<Long> subscribers = productUserNotificationService.findSubscriberByProductId(productId);
+        List<Long> subscribers = productUserNotificationService.findSubscribersByProductId(productId);
 
         NotificationRequest request = new NotificationRequest(productId, product.getReStockVersion(), subscribers);
         notificationManager.notifyRestock(request);
