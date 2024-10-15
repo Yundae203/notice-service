@@ -40,7 +40,6 @@ public class Consumer implements Runnable {
     }
 
     @Override
-    @Transactional
     public void run() {
 
         while (true) {
