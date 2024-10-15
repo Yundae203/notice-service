@@ -8,7 +8,6 @@ import enterprise.subject.notification.product_user_notification.model.ProductUs
 import enterprise.subject.notification.product_user_notification.repository.ProductUserNotificationHistoryRepository;
 import io.github.bucket4j.Bucket;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
@@ -73,6 +72,7 @@ public class Consumer implements Runnable {
                 // 마지막 요청일 경우 HashMap 에서 key 제거
                 if (isLastNotice(notice)) {
                     productsId.remove(notice.getProductId());
+                    // 이때 saveAll()
                 }
 
             } catch (Exception e) {
